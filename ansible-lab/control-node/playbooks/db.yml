@@ -1,0 +1,26 @@
+---
+- name: Configurar servidor de banco de dados
+  hosts: db01 #no exemplo do projeto, só tem um servidor
+
+  user: vagrant
+  become: yes #user se tornará um user root
+  vars_files:
+    - vars/main.yml #informando que o caminho das variáves estarão nesse arquivo
+  vars: #tb pode ser declarado variáveis no arquivo
+    - dbname: "db01" #é o nome do banco de dados
+    - dbusername: "root" #o usuário
+    - dbpassword: "senha123" #a senha. Não é boa prática informar a senha explícito no arquivo yml.
+  tasks: #informa as tasks que serão executdadas neste yml
+    - name: Configurar hosts lab ansible
+      lineinfile: 
+        dest: /etc/hosts
+        state: present
+        line: line "{{item}}" #vai adicionar algumas linhas dentro de um arquivo de configuração. Path é o caminho do arquivo que será alterado
+      with_items: #para cada item abaixo, ele será adicionado no arquivo /etc/hosts
+        - 192.168.56.2 control-node
+        - 192.168.56.3 app01
+        - 192.169.56.3 db01
+  roles: #são tasks que são associadas a uma role. Pode ser criada ou buscada no galaxy
+    - configuracao-default-so #role que será criada
+    - role: geerlingguy.mysql #role que foi importada https://galaxy.ansible.com/geerlingguy/mysql
+
